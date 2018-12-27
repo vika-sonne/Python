@@ -27,17 +27,17 @@ def dump_rcv(buff, message='', level=0):
 	if VERBOSE_LEVEL < level:
 		return
 	if len(message) > 0:
-		print datetime.now().strftime('%H:%M:%S.%f ')+str(len(buff))+'\t'*level+' >> '+message+': '+buff.decode('latin').encode('unicode_escape')
+		print datetime.now().strftime('%H:%M:%S.%f ')+'{:02}'.format(len(buff))+'\t'*level+' >> '+message+': '+buff.decode('latin').encode('unicode_escape')
 	else:
-		print datetime.now().strftime('%H:%M:%S.%f ')+str(len(buff))+'\t'*level+' >> '+buff.decode('latin').encode('unicode_escape')
+		print datetime.now().strftime('%H:%M:%S.%f ')+'{:02}'.format(len(buff))+'\t'*level+' >> '+buff.decode('latin').encode('unicode_escape')
 
 def dump_snd(buff, message='', level=0):
 	if VERBOSE_LEVEL < level:
 		return
 	if len(message) > 0:
-		print datetime.now().strftime('%H:%M:%S.%f')+'\t'*level+' << '+message+': '+buff.decode('latin').encode('unicode_escape')
+		print datetime.now().strftime('%H:%M:%S.%f')+'{:02}'.format(len(buff))+'\t'*level+' << '+message+': '+buff.decode('latin').encode('unicode_escape')
 	else:
-		print datetime.now().strftime('%H:%M:%S.%f')+'\t'*level+' << '+buff.decode('latin').encode('unicode_escape')
+		print datetime.now().strftime('%H:%M:%S.%f')+'{:02}'.format(len(buff))+'\t'*level+' << '+buff.decode('latin').encode('unicode_escape')
 
 DEFAULT_COM_PORT = 'COM1' if sys.platform.startswith('win') else 'ttyUSB0'
 DEFAULT_COM_BAUDRATE = 115200
@@ -53,6 +53,7 @@ def pase_args():
 	parser.add_argument('-r', action='store_true', help='reconnect to serial port')
 	parser.add_argument('--reconnect-delay', metavar='SEC', type=float, default=DEFAULT_COM_RECONNECT_DELAY,
 		help='reconnect delay, s; default: '+str(DEFAULT_COM_RECONNECT_DELAY))
+	parser.add_argument('--trace-error', action='store_true', help='show the errors trace; default: off')
 	args = parser.parse_args()
 	VERBOSE_LEVEL = args.v
 	if VERBOSE_LEVEL > 0:
@@ -96,8 +97,9 @@ def port_dump():
 					dump_rcv(buff)
 		except Exception as e:
 			print u'ERROR: '+str(e)
-			exc_type, exc_value, exc_traceback = sys.exc_info()
-			traceback.print_tb(exc_traceback, file=sys.stderr)
+			if args.trace_error:
+				exc_type, exc_value, exc_traceback = sys.exc_info()
+				traceback.print_tb(exc_traceback, file=sys.stderr)
 		except (KeyboardInterrupt, SystemExit):
 			sys.exit(-1)
 
