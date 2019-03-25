@@ -19,25 +19,25 @@ def dump(message, level=0, datetime_stamp=False, ignore_verbose_level=False):
 	if VERBOSE_LEVEL < level and not ignore_verbose_level:
 		return
 	if datetime_stamp:
-		print datetime.now().isoformat()+' '+'\t'*level+message
+		print(datetime.now().isoformat()+' '+'\t'*level+message)
 	else:
-		print datetime.now().strftime('%H:%M:%S.%f ')+'\t'*level+message
+		print(datetime.now().strftime('%H:%M:%S.%f ')+'\t'*level+message)
 
 def dump_rcv(buff, message='', level=0):
 	if VERBOSE_LEVEL < level:
 		return
 	if len(message) > 0:
-		print datetime.now().strftime('%H:%M:%S.%f ')+'{:02}'.format(len(buff))+'\t'*level+' >> '+message+': '+buff.decode('latin').encode('unicode_escape')
+		print(datetime.now().strftime('%H:%M:%S.%f ')+'{:02}'.format(len(buff))+'\t'*level+' >> '+message+': '+str(buff.decode('latin').encode('unicode_escape')))
 	else:
-		print datetime.now().strftime('%H:%M:%S.%f ')+'{:02}'.format(len(buff))+'\t'*level+' >> '+buff.decode('latin').encode('unicode_escape')
+		print(datetime.now().strftime('%H:%M:%S.%f ')+'{:02}'.format(len(buff))+'\t'*level+' >> '+str(buff.decode('latin').encode('unicode_escape')))
 
 def dump_snd(buff, message='', level=0):
 	if VERBOSE_LEVEL < level:
 		return
 	if len(message) > 0:
-		print datetime.now().strftime('%H:%M:%S.%f')+'{:02}'.format(len(buff))+'\t'*level+' << '+message+': '+buff.decode('latin').encode('unicode_escape')
+		print(datetime.now().strftime('%H:%M:%S.%f')+'{:02}'.format(len(buff))+'\t'*level+' << '+message+': '+str(buff.decode('latin').encode('unicode_escape')))
 	else:
-		print datetime.now().strftime('%H:%M:%S.%f')+'{:02}'.format(len(buff))+'\t'*level+' << '+buff.decode('latin').encode('unicode_escape')
+		print(datetime.now().strftime('%H:%M:%S.%f')+'{:02}'.format(len(buff))+'\t'*level+' << '+str(buff.decode('latin').encode('unicode_escape')))
 
 DEFAULT_COM_PORT = 'COM1' if sys.platform.startswith('win') else 'ttyUSB0'
 DEFAULT_COM_BAUDRATE = 115200
@@ -74,8 +74,9 @@ dump('START', datetime_stamp=True)
 if not sys.platform.startswith('win') and args.port.find('/') < 0:
 	args.port = '/dev/'+args.port
 
-def port_dump():
-	dump('Open serial port: {} @ {} 8N1'.format(args.port, args.baudrate))
+def port_dump(show_open_message=True):
+	if show_open_message:
+		dump('Open serial port: {} @ {} 8N1'.format(args.port, args.baudrate))
 	port = None
 	try:
 		port = serial.Serial(
@@ -86,7 +87,8 @@ def port_dump():
 			parity=serial.PARITY_NONE,
 			stopbits=serial.STOPBITS_ONE)
 	except Exception as e:
-		print u'ERROR: '+str(e)
+		if args.trace_error:
+			print(u'ERROR: '+str(e))
 	else:
 		try:
 			if not port.is_open:
@@ -96,8 +98,8 @@ def port_dump():
 				if len(buff) > 0:
 					dump_rcv(buff)
 		except Exception as e:
-			print u'ERROR: '+str(e)
 			if args.trace_error:
+				print(u'ERROR: '+str(e))
 				exc_type, exc_value, exc_traceback = sys.exc_info()
 				traceback.print_tb(exc_traceback, file=sys.stderr)
 		except (KeyboardInterrupt, SystemExit):
@@ -108,8 +110,10 @@ def port_dump():
 	del port
 
 if args.r:
+	show_open_message = True
 	while True:
-		port_dump()
+		port_dump(show_open_message)
+		show_open_message = False
 		time.sleep(args.reconnect_delay)
 else:
 	port_dump()
