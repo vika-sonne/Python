@@ -7,7 +7,7 @@ Python utility that helps to capture the log especially from serial ports (USART
 
 Developed as primary logs grabber tool for electronic device developers.
 
-#####Usage:
+##### Usage:
 ```sh
 $ python sspd.py -h
 usage: sspd.py [-h] [-p COM_PORT] [-b BAUDRATE] [-v] [-r]
@@ -28,7 +28,7 @@ optional arguments:
                         reconnect delay, s; default: 2.0
   --trace-error         show the errors trace; default: off
 ```
-#####Log example:
+##### Log example:
 ```sh
 $ python sspd.py -r --reconnect-delay 1 -b 250000 -p ttyACM0
 2019-06-04T11:59:16.344617 START
@@ -42,7 +42,7 @@ $ python sspd.py -r --reconnect-delay 1 -b 250000 -p ttyACM0
 ## convert_to_h.py
 Converts file as binary blob to C/C++ header as array.
 
-#####Usage:
+##### Usage:
 ```sh
 $ python3 convert_to_h.py -h
 usage: convert_to_h.py [-h] -i INPUT_FILEPATH [-o OUTPUT_FILEPATH]
@@ -57,7 +57,7 @@ optional arguments:
   -d ARRAY_DECLARATION  array declaration; default: "unsigned char binary_blob"
 ```
 
-#####Examples:
+##### Examples:
 ```sh
 $ python3 convert_to_h.py -i convert_to_h.py
 unsigned char binary_blob[1370] = {
