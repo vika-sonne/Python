@@ -1,8 +1,8 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
 
-#      Simple serial port dump
-#     Copyright (C) Victoria Danchenko, 2018.
+#	Simple serial port dump
+#	Copyright (C) Victoria Danchenko, 2018.
 #
 # Released under a MIT license, see LICENCE.txt.
 
@@ -19,25 +19,25 @@ def dump(message, level=0, datetime_stamp=False, ignore_verbose_level=False):
 	if VERBOSE_LEVEL < level and not ignore_verbose_level:
 		return
 	if datetime_stamp:
-		print(datetime.now().isoformat()+' '+'\t'*level+message)
+		print datetime.now().isoformat()+' '+'\t'*level+message
 	else:
-		print(datetime.now().strftime('%H:%M:%S.%f ')+'\t'*level+message)
+		print datetime.now().strftime('%H:%M:%S.%f ')+'\t'*level+message
 
 def dump_rcv(buff, message='', level=0):
 	if VERBOSE_LEVEL < level:
 		return
 	if len(message) > 0:
-		print(datetime.now().strftime('%H:%M:%S.%f ')+'{:02}'.format(len(buff))+'\t'*level+' >> '+message+': '+str(buff.decode('latin').encode('unicode_escape')))
+		print datetime.now().strftime('%H:%M:%S.%f ')+'{:02}'.format(len(buff))+'\t'*level+' >> '+message+': '+buff.decode('latin').encode('unicode_escape')
 	else:
-		print(datetime.now().strftime('%H:%M:%S.%f ')+'{:02}'.format(len(buff))+'\t'*level+' >> '+str(buff.decode('latin').encode('unicode_escape')))
+		print datetime.now().strftime('%H:%M:%S.%f ')+'{:02}'.format(len(buff))+'\t'*level+' >> '+buff.decode('latin').encode('unicode_escape')
 
 def dump_snd(buff, message='', level=0):
 	if VERBOSE_LEVEL < level:
 		return
 	if len(message) > 0:
-		print(datetime.now().strftime('%H:%M:%S.%f')+'{:02}'.format(len(buff))+'\t'*level+' << '+message+': '+str(buff.decode('latin').encode('unicode_escape')))
+		print datetime.now().strftime('%H:%M:%S.%f')+'{:02}'.format(len(buff))+'\t'*level+' << '+message+': '+buff.decode('latin').encode('unicode_escape')
 	else:
-		print(datetime.now().strftime('%H:%M:%S.%f')+'{:02}'.format(len(buff))+'\t'*level+' << '+str(buff.decode('latin').encode('unicode_escape')))
+		print datetime.now().strftime('%H:%M:%S.%f')+'{:02}'.format(len(buff))+'\t'*level+' << '+buff.decode('latin').encode('unicode_escape')
 
 DEFAULT_COM_PORT = 'COM1' if sys.platform.startswith('win') else 'ttyUSB0'
 DEFAULT_COM_BAUDRATE = 115200
@@ -51,6 +51,7 @@ def pase_args():
 		help='serial port baudrate; default: '+str(DEFAULT_COM_BAUDRATE))
 	parser.add_argument('-v', action='count', default=0, help='verbose level: -v, -vv or -vvv (bytes); default: -v')
 	parser.add_argument('-r', action='store_true', help='reconnect to serial port')
+	parser.add_argument('--bytes', action='store_true', help='receive byte by byte')
 	parser.add_argument('--reconnect-delay', metavar='SEC', type=float, default=DEFAULT_COM_RECONNECT_DELAY,
 		help='reconnect delay, s; default: '+str(DEFAULT_COM_RECONNECT_DELAY))
 	parser.add_argument('--trace-error', action='store_true', help='show the errors trace; default: off')
@@ -74,8 +75,8 @@ dump('START', datetime_stamp=True)
 if not sys.platform.startswith('win') and args.port.find('/') < 0:
 	args.port = '/dev/'+args.port
 
-def port_dump(show_open_message=True):
-	if show_open_message:
+def port_dump(show_connect_message=True, show_connect_error_message=True):
+	if show_connect_message:
 		dump('Open serial port: {} @ {} 8N1'.format(args.port, args.baudrate))
 	port = None
 	try:
@@ -87,19 +88,22 @@ def port_dump(show_open_message=True):
 			parity=serial.PARITY_NONE,
 			stopbits=serial.STOPBITS_ONE)
 	except Exception as e:
-		if args.trace_error:
-			print(u'ERROR: '+str(e))
+		if show_connect_error_message:
+			print u'ERROR: '+str(e)
 	else:
 		try:
 			if not port.is_open:
 				port.open()
 			while True:
-				buff = port.readline()
+				if args.bytes:
+					buff = port.read()
+				else:
+					buff = port.readline()
 				if len(buff) > 0:
 					dump_rcv(buff)
 		except Exception as e:
+			print u'ERROR: '+str(e)
 			if args.trace_error:
-				print(u'ERROR: '+str(e))
 				exc_type, exc_value, exc_traceback = sys.exc_info()
 				traceback.print_tb(exc_traceback, file=sys.stderr)
 		except (KeyboardInterrupt, SystemExit):
@@ -110,10 +114,10 @@ def port_dump(show_open_message=True):
 	del port
 
 if args.r:
-	show_open_message = True
+	show_connect_message = True
 	while True:
-		port_dump(show_open_message)
-		show_open_message = False
+		port_dump(show_connect_message=show_connect_message, show_connect_error_message=False)
+		show_connect_message = False
 		time.sleep(args.reconnect_delay)
 else:
 	port_dump()
