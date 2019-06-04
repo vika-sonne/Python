@@ -1,5 +1,13 @@
 ## Python miscellaneous routines for electronic device developers
 
+This python 3 routines is ready to use for Linux & Windows. Although the Linux is primary OS for me and this routines well tested for it.
+
+Installation required modules by [pip](https://pip.pypa.io/en/stable/installing/):
+```sh
+$ pip install argparse
+```
+
+
 ## SSPD
 Simple serial port dump.
 
