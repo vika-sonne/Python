@@ -81,3 +81,12 @@ static U8[1370] = {
 0x73, 0x2E, 0x73, 0x74, 0x64, 0x6F, 0x75, 0x74, 0x29, 0xA
 };
 ```
+
+## ASPC
+Atmel Studio Project file Converter. Comman-line utility that helps migrate projects to Eclipse.
+Usually C/C++ project has many include paths & defines, so the main problem is correct copy this items to Eclipse. Mainly, project files represent by one xml file. So it is enough to copy xml data between import & export files. This utility helps done this in semi-automatic way.
+
+After running this utility several files will be created:
+- *eclipse cproject.xml* file contains *sourceEntries/entry* xml tags with list of project files. This piece of xml data need to insert into Eclipse *.cproject* file. Or skip this copying and configure excluded files manually in Eclipse project tree.
+- *eclipse settings '(Configuration)' == 'CONFIGURATION_NAME'.xml* files (one per configuration) contains include paths & defines to import on the Eclipse  project property page *"C/C++ General" / "Paths and Symbols"* by button *"Import Settings..."*.
+- Also output can be redirected to *.htm* file to view project properties, configurations e.t.c.
