@@ -90,3 +90,12 @@ After running this utility several files will be created:
 - *eclipse cproject.xml* file contains *sourceEntries/entry* xml tags with list of project files. This piece of xml data need to insert into Eclipse *.cproject* file. Or skip this copying and configure excluded files manually in Eclipse project tree.
 - *eclipse settings '(Configuration)' == 'CONFIGURATION_NAME'.xml* files (one per configuration) contains include paths & defines to import on the Eclipse  project property page *"C/C++ General" / "Paths and Symbols"* by button *"Import Settings..."*.
 - Also output can be redirected to *.htm* file to view project properties, configurations e.t.c.
+
+## Generate UUID
+Prints out the UUID as C/C++ array as hex values.
+
+Example:
+```
+python generate_uuid.py 
+{ 0xB3, 0xE9, 0x63, 0x2C, 0xC0, 0xB4, 0x43, 0xAB, 0x99, 0x60, 0x8A, 0x7E, 0x93, 0x55, 0x29, 0x5A };
+```
