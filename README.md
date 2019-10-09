@@ -4,20 +4,24 @@ This python 3 routines is ready to use for Linux & Windows. Although the Linux i
 
 Installation required modules by [pip](https://pip.pypa.io/en/stable/installing/):
 ```sh
-$ pip install argparse
+pip install argparse, pyserial
 ```
 
 
 ## SSPD
 Simple serial port dump.
 
-Python utility that helps to capture the log especially from serial ports (USART, e.t.c.) including precise timestamps & bytes and port reconnect features.
+Python utility that helps capturing the log especially from serial ports (USART, e.t.c.) and includes features:
+* precise timestamps (μs for Linux, ms for Windows);
+* C-style escape for bytes dump;
+* port reconnect;
+* USB port search by VID:PID.
 
 Developed as primary logs grabber tool for electronic device developers.
 
 ##### Usage:
 ```sh
-$ python sspd.py -h
+python sspd.py -h
 usage: sspd.py [-h] [-p COM_PORT] [-b BAUDRATE] [-v] [-r]
                [--reconnect-delay SEC]
 
@@ -31,14 +35,37 @@ optional arguments:
                         serial port baudrate; default: 115200
   -v                    verbose level: -v, -vv or -vvv (bytes); default: -v
   -r                    reconnect to serial port
-  --bytes               recieve byte by byte
+  --bytes               receive byte by byte
   --reconnect-delay SEC
                         reconnect delay, s; default: 2.0
+  --vid-pid VID:PID     search for USB: VendorID:ProductID[,VendorID:ProductID[...]]; example: 03eb:2404,03eb:6124
   --trace-error         show the errors trace; default: off
 ```
+
+##### Usage examples:
+* Reconnect & USB VID:PID search (Atmel μC):
+```sh
+python sspd.py -r --vid-pid 03eb:2404,03eb:6124
+```
+
+* Reconnect (with period 1s), baudrate & port (for Linux):
+```sh
+sspd.py --reconnect-delay 1 -rb 250000 -p ttyACM0
+```
+
+* Unbuffered python stdout, reconnect, port & write to log file and console simultaneously (for Linux):
+```sh
+python -u sspd.py -rp ttyACM0 | tee ~/1.log
+```
+
+* Unbuffered python stdout, reconnect, port, log file name is current date_time (example: 2019-09-10_19-37-59.log) (for Linux):
+```sh
+python -u sspd.py -rp ttyACM0 > ~/$(date +"%Y-%d-%m_%H-%M-%S").log
+```
+
 ##### Log example:
 ```sh
-$ python sspd.py -r --reconnect-delay 1 -b 250000 -p ttyACM0
+python sspd.py -r --reconnect-delay 1 -b 250000 -p ttyACM0
 2019-06-04T11:59:16.344617 START
 11:59:16.344714 Open serial port: /dev/ttyACM0 @ 250000 8N1
 12:00:51.544121 09 >> ADC1=843\n
@@ -52,7 +79,7 @@ Converts file as binary blob to C/C++ header as array.
 
 ##### Usage:
 ```sh
-$ python3 convert_to_h.py -h
+python3 convert_to_h.py -h
 usage: convert_to_h.py [-h] -i INPUT_FILEPATH [-o OUTPUT_FILEPATH]
                        [-d ARRAY_DECLARATION]
 
@@ -67,14 +94,14 @@ optional arguments:
 
 ##### Examples:
 ```sh
-$ python3 convert_to_h.py -i convert_to_h.py
+python3 convert_to_h.py -i convert_to_h.py
 unsigned char binary_blob[1370] = {
 0x23, 0x21, 0x2F, 0x75, 0x73, 0x72, 0x2F, 0x62, 0x69, 0x6E, 0x2F, 0x65, 0x6E, 0x76, 0x20, 0x70,
 ...
 0x73, 0x2E, 0x73, 0x74, 0x64, 0x6F, 0x75, 0x74, 0x29, 0xA
 };
 
-$ python3 convert_to_h.py -i convert_to_h.py -d "static U8"
+python3 convert_to_h.py -i convert_to_h.py -d "static U8"
 static U8[1370] = {
 0x23, 0x21, 0x2F, 0x75, 0x73, 0x72, 0x2F, 0x62, 0x69, 0x6E, 0x2F, 0x65, 0x6E, 0x76, 0x20, 0x70,
 ...
@@ -83,7 +110,7 @@ static U8[1370] = {
 ```
 
 ## ASPC
-Atmel Studio Project file Converter. Comman-line utility that helps migrate projects to Eclipse.
+Atmel Studio Project file Converter. Python 2 command-line utility that helps migrate projects to Eclipse.
 Usually C/C++ project has many include paths & defines, so the main problem is correct copy this items to Eclipse. Mainly, project files represent by one xml file. So it is enough to copy xml data between import & export files. This utility helps done this in semi-automatic way.
 
 After running this utility several files will be created:
