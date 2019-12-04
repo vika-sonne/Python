@@ -96,8 +96,11 @@ def port_dump(show_connect_message=True, show_connect_error_message=True):
 			parity=serial.PARITY_NONE,
 			stopbits=serial.STOPBITS_ONE)
 	except Exception as e:
-		if show_connect_error_message:
+		if show_connect_error_message or args.trace_error:
 			print(u'ERROR: '+str(e))
+			if args.trace_error:
+				exc_type, exc_value, exc_traceback = sys.exc_info()
+				traceback.print_tb(exc_traceback, file=sys.stderr)
 	else:
 		try:
 			if not port.is_open:
@@ -109,6 +112,8 @@ def port_dump(show_connect_message=True, show_connect_error_message=True):
 					buff = port.readline()
 				if len(buff) > 0:
 					dump_rcv(buff)
+				else:
+					return
 		except Exception as e:
 			print(u'ERROR: '+str(e))
 			if args.trace_error:
@@ -147,11 +152,12 @@ def main():
 		show_connect_message = True
 		while True:
 			port_dump(show_connect_message=show_connect_message, show_connect_error_message=False)
-			show_connect_message = False
+			time.sleep(args.reconnect_delay)
 			if args.vid_pid:
+				show_connect_message = True
 				autoconnect() # scan USB devices & wait
 			else:
-				time.sleep(args.reconnect_delay)
+				show_connect_message = False
 	else:
 		port_dump()
 
