@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 # Atmel Studio Project file Converter
+# Copyright (C) Victoria Danchenko, 2019.
+# https://github.com/vika-sonne/electronix-python
 
 import sys
 import datetime
