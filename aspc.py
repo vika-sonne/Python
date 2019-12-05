@@ -17,7 +17,7 @@ class AtmelStudioCProjectFile():
 	NAMESPACE_MSBUILD_2003 = 'http://schemas.microsoft.com/developer/msbuild/2003'
 
 	@staticmethod
-	def unescape(text):
+	def unescape(text: str) -> str:
 		while True:
 			escape_index = text.find('%')
 			if escape_index < 0:
@@ -27,14 +27,17 @@ class AtmelStudioCProjectFile():
 	class Condition():
 		def __init__(self, condition=''):
 			self.condition = condition
-			self.defines, self.include_paths = [], []
-			self.compiler_optimization, self.compiler_debug_level, self.compiler_other_flags = '', '', ''
+			self.defines: List[str] = []
+			self.include_paths: List[str] = []
+			self.compiler_flags, self.compiler_optimization, self.compiler_debug_level = '', '', ''
 			self.assembler_flags = ''
-			self.linker_libraries, self.linker_library_search_paths, self.linker_flags = [], [], ''
+			self.linker_libraries: List[str] = []
+			self.linker_library_search_paths: List[str] = []
+			self.linker_flags = ''
 
-	def __init__(self, project_file_path):
+	def __init__(self, project_file_path: str):
 
-		def get_subelement_text(parent_element, subelement_name) -> str:
+		def get_subelement_text(parent_element, subelement_name: str) -> str:
 			subelement = parent_element.xpath('x:{}'.format(subelement_name), namespaces={'x': AtmelStudioCProjectFile.NAMESPACE_MSBUILD_2003})
 			return AtmelStudioCProjectFile.unescape(subelement[0].text) if subelement else ''
 
@@ -56,7 +59,7 @@ class AtmelStudioCProjectFile():
 						condition.defines = get_subelements_list_texts(arm_gcc, 'armgcc.compiler.symbols.DefSymbols')
 						condition.include_paths = get_subelements_list_texts(arm_gcc, 'armgcc.compiler.directories.IncludePaths')
 						condition.compiler_optimization = get_subelement_text(arm_gcc, 'armgcc.compiler.optimization.level')
-						condition.compiler_other_flags = ' '.join([ get_subelement_text(arm_gcc, 'armgcc.compiler.optimization.OtherFlags'), get_subelement_text(arm_gcc, 'armgcc.compiler.miscellaneous.OtherFlags') ] )
+						condition.compiler_flags = ' '.join([ get_subelement_text(arm_gcc, 'armgcc.compiler.optimization.OtherFlags'), get_subelement_text(arm_gcc, 'armgcc.compiler.miscellaneous.OtherFlags') ] )
 						condition.compiler_debug_level = get_subelement_text(arm_gcc, 'armgcc.compiler.optimization.DebugLevel')
 						condition.assembler_flags = get_subelement_text(arm_gcc, 'armgcc.preprocessingassembler.general.AssemblerFlags')
 						condition.linker_libraries = get_subelements_list_texts(arm_gcc, 'armgcc.linker.libraries.Libraries')
@@ -75,8 +78,8 @@ class AtmelStudioCProjectFile():
 
 	def __str__(self):
 		def condition_str(condition):
-			return 'condition: "{}"; defines: "{}"; compiler_optimization: "{}"; compiler_other_flags: "{}"; compiler_debug_level: "{}"; linker_libraries: "{}"; linker_library_search_paths: "{}"; linker_flags: "{}"; include_paths: "{}"'.format(
-				condition.condition, '", "'.join(condition.defines), condition.compiler_optimization, condition.compiler_other_flags, condition.compiler_debug_level, '", "'.join(condition.linker_libraries), '", "'.join(condition.linker_library_search_paths), condition.linker_flags, '", "'.join(condition.include_paths))
+			return 'condition: "{}"; defines: "{}"; compiler_optimization: "{}"; compiler_flags: "{}"; compiler_debug_level: "{}"; linker_libraries: "{}"; linker_library_search_paths: "{}"; linker_flags: "{}"; include_paths: "{}"'.format(
+				condition.condition, '", "'.join(condition.defines), condition.compiler_optimization, condition.compiler_flags, condition.compiler_debug_level, '", "'.join(condition.linker_libraries), '", "'.join(condition.linker_library_search_paths), condition.linker_flags, '", "'.join(condition.include_paths))
 		ret = 'Project: "{}"; device: "{}"; files: "{}"; exclude_files: "{}"'.format(
 				self.name, self.device, '", "'.join(self.files), '", "'.join(self.exclude_files))
 		for condition in self.conditions:
@@ -84,7 +87,7 @@ class AtmelStudioCProjectFile():
 		return ret
 
 
-def normalize_path(text):
+def normalize_path(text: str):
 	def convert_variable_usage(text):
 		while True:
 			variable_index = text.find('$(')
@@ -149,6 +152,7 @@ if __name__ == "__main__":
 
 		parser_info = subparsers.add_parser('info', help='print the Atmel Studio project information')
 		parser_info.add_argument('kind', choices=['conditions', 'include', 'exclude', 'defines'])
+		parser_info.add_argument('-c', '--condition', default='', help='name of Atmel Studio Project build condition; optional')
 		del parser_info
 
 		parser_htm = subparsers.add_parser('htm', help='print the html report')
@@ -166,12 +170,13 @@ if __name__ == "__main__":
 
 		parser_sh = subparsers.add_parser('sh', help='export to build shell script')
 		parser_sh.add_argument('-c', '--condition', required=True, help='name of Atmel Studio Project build condition')
-		parser_sh.add_argument('--toolchain-prefix', metavar='PREFIX', default='arm-none-eabi-', help='toolchain excecutables file name prefix; default: arm-none-eabi-')
-		parser_sh.add_argument('--toolchain-suffix', metavar='SUFFIX', default='', help='toolchain excecutables file name suffix')
-		parser_sh.add_argument('--cflags', default='', help='C compiler flags')
-		parser_sh.add_argument('--ldflags', default='', help='linker flags')
-		parser_sh.add_argument('--toolchain-path', metavar='PATH', default='', help='path to toolchain excecutables; example: /opt/gcc-arm-none-eabi-4_8-2014q3/bin')
-		parser_sh.add_argument('--target-file', default='a.out', help='Target file; example: target.elf')
+		parser_sh.add_argument('--cc', default='gcc', help='toolchain c compiler; default: gcc')
+		parser_sh.add_argument('--ld', default='gcc', help='toolchain linker; default: gcc')
+		parser_sh.add_argument('--cflags', default='', help='C compiler flags; optional')
+		parser_sh.add_argument('--ldflags', default='', help='linker flags; optional')
+		parser_sh.add_argument('--toolchain-path', metavar='PATH', default='', \
+			help='path to toolchain excecutables; optional; example: /opt/gcc-arm-none-eabi-4_8-2014q3/bin')
+		parser_sh.add_argument('--target-file', default='a.out', help='Target file; default: a.out; example: target.elf')
 		del parser_sh
 
 		args = parser.parse_args()
@@ -195,24 +200,33 @@ if __name__ == "__main__":
 	cproject = AtmelStudioCProjectFile(args.project_file)
 
 	if args.cmd == 'info':
+		has_condition = hasattr(args, 'condition') and args.condition
 		if args.kind == 'conditions':
+			# print name for all conditions
 			for condition in cproject.conditions:
 				print(condition.condition)
 		elif args.kind == 'include':
+			# print included files for one or all conditions
 			for condition in cproject.conditions:
-				print()
-				print(condition.condition)
-				for f in sorted(condition.include_paths):
-					print(f)
+				if not has_condition:
+					print()
+					print(condition.condition)
+				if not has_condition or condition.condition == args.condition:
+					for f in sorted(condition.include_paths):
+						print(f)
 		elif args.kind == 'exclude':
+			# print excluded files for all conditions
 			for exclude_file in sorted(cproject.exclude_files):
 				print(exclude_file)
 		elif args.kind == 'defines':
+			# print defines for one or all conditions
 			for condition in cproject.conditions:
-				print()
-				print(condition.condition)
-				for define in sorted(condition.defines):
-					print(define)
+				if not has_condition:
+					print()
+					print(condition.condition)
+				if not has_condition or condition.condition == args.condition:
+					for define in sorted(condition.defines):
+						print(define)
 
 	elif args.cmd == 'htm':
 		# print the html
@@ -237,7 +251,7 @@ if __name__ == "__main__":
 			print('<table frame="border" cellpadding="5"><caption><h3 style="text-align:left">'+str(condition_index+1)+'.2. Compiler</h3></caption>')
 			print('<tr><td>Optimization</td><td>'+condition.compiler_optimization+'</td></tr>')
 			print('<tr><td>Debug level</td><td>'+condition.compiler_debug_level+'</td></tr>')
-			print('<tr><td>Other flags</td><td>'+condition.compiler_other_flags+'</td></tr>')
+			print('<tr><td>Other flags</td><td>'+condition.compiler_flags+'</td></tr>')
 			print('</table>')
 			# assembler
 			print('<table frame="border" cellpadding="5"><caption><h3 style="text-align:left">'+str(condition_index+1)+'.3. Assembler</h3></caption>')
@@ -296,34 +310,40 @@ if __name__ == "__main__":
 date -Is
 
 # C Compiler
-CC={'"'+os.path.join(args.toolchain_path, args.toolchain_prefix+'gcc'+args.toolchain_suffix)+'"'}
+CC={'"'+os.path.join(args.toolchain_path, args.cc)+'"'}
 
 # Linker
-LD={'"'+os.path.join(args.toolchain_path, args.toolchain_prefix+'gcc'+args.toolchain_suffix)+'"'}
+LD={'"'+os.path.join(args.toolchain_path, args.ld)+'"'}
 
 # C compiler FLAGS
-CFLAGS="{' '.join(['-D'+x for x in condition.defines])} {condition.compiler_other_flags} {' '.join(['-I'+normalize_path(x) for x in condition.include_paths])} {args.cflags}"
+CFLAGS="{' '.join(['-D'+x for x in condition.defines])} {condition.compiler_flags} {' '.join(['-I'+normalize_path(x) for x in condition.include_paths])} {args.cflags}"
 
 # Linker FLAGS
 LDFLAGS="{' '.join(['-l'+(x[3:] if x.startswith('lib') else x) for x in condition.linker_libraries])} {' '.join(['-L'+normalize_path(x) for x in condition.linker_library_search_paths])} {condition.linker_flags} {args.ldflags}"
+
+echo "*** PREPARE PATH TREE"
 
 # Create necessary path tree
 {os.linesep.join(sorted(set(['mkdir -p "'+os.path.dirname(normalize_path(x))+'"' for x in cproject.files if x.endswith('.c')])))}
 
 # Remove target file
-rm -vf {args.target_file}
+rm -vf "{args.target_file}"
+
+echo "*** END OF PATH TREE"
+echo "*** COMPILATION"
 
 # Run C Compiler
 {os.linesep.join( ['echo '+normalize_path(x)+os.linesep+'$CC $CFLAGS -o "'+normalize_path(x)[:-2]+'.o" "../'+normalize_path(x)+'"' for x in cproject.files if x.endswith('.c')] )}
 
-echo Link
+echo "*** END COMPILATION"
+echo "*** LINKING"
 $LD $LDFLAGS {' '.join(['"'+normalize_path(x)[:-2]+'.o"' for x in cproject.files if x.endswith('.c')])} -o {args.target_file}
 
 if [ "$?" -eq 0 ]
 then
-	echo "Link OK"
+	echo "*** LINK OK"
 else
-	echo "Link FAIL"
+	echo "*** LINK FAIL"
 fi
 
 date -Is
