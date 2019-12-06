@@ -89,7 +89,7 @@ class AtmelStudioCProjectFile():
 		return ret
 
 
-def normalize_path(text: str):
+def normalize_path(text: str) -> str:
 	def convert_variable_usage(text):
 		while True:
 			variable_index = text.find('$(')
@@ -107,6 +107,12 @@ def normalize_path(text: str):
 	else:
 		text = text.replace('\\', '/') # windows paths separator to linux
 	return text
+
+def normalize_src_path(path: str) -> str:
+	path = normalize_path(path)
+	if args.src_path != '../' and path.startswith('../'):
+		return os.path.join(args.src_path, path[3:])
+	return path
 
 def print_eclipse_cdt_includes_and_symbols_xml(cproject: AtmelStudioCProjectFile, condition: AtmelStudioCProjectFile.Condition):
 
@@ -171,6 +177,7 @@ if __name__ == "__main__":
 		del parser_eclipse
 
 		parser_sh = subparsers.add_parser('sh', help='export to build shell script')
+		parser_sh.add_argument('--src-path', metavar='PATH', default='../', help='path to sources to compile; default: ../')
 		parser_sh.add_argument('-c', '--condition', required=True, help='name of Atmel Studio Project build condition')
 		parser_sh.add_argument('--cc', default='gcc', help='toolchain c compiler; default: gcc')
 		parser_sh.add_argument('--ld', default='gcc', help='toolchain linker; default: gcc')
@@ -194,8 +201,9 @@ if __name__ == "__main__":
 					str(value)+('' if is_numeric(value) else '"'))
 		return args
 
-	def escape_path(path):
-		return "".join(x for x in path if (x.isalnum() or x in "._-()[]{}+-'= "))
+	def escape_path(path: str) -> str:
+		'Escapes spaces with backslash for UNIX'
+		return "".join('\\'+x if x in ' "?$' else x for x in path)
 
 	args = parse_args()
 
@@ -318,24 +326,24 @@ CC={'"'+os.path.join(args.toolchain_path, args.cc)+'"'}
 LD={'"'+os.path.join(args.toolchain_path, args.ld)+'"'}
 
 # C compiler FLAGS
-CFLAGS="{' '.join(['-D'+x for x in condition.defines])} {condition.compiler_flags} {' '.join(['-I'+normalize_path(x) for x in condition.include_paths])} {args.cflags}"
+CFLAGS="{' '.join(['-D'+x for x in condition.defines])} {condition.compiler_flags} {' '.join(['-I'+normalize_src_path(x) for x in condition.include_paths])} {args.cflags}"
 
 # Linker FLAGS
-LDFLAGS="{' '.join(['-l'+(x[3:] if x.startswith('lib') else x) for x in condition.linker_libraries])} {' '.join(['-L'+normalize_path(x) for x in condition.linker_library_search_paths])} {condition.linker_flags} {args.ldflags}"
+LDFLAGS="{' '.join(['-l'+(x[3:] if x.startswith('lib') else x) for x in condition.linker_libraries])} {' '.join(['-L'+normalize_src_path(x) for x in condition.linker_library_search_paths])} {condition.linker_flags} {args.ldflags}"
 
-echo "*** PREPARE PATH TREE"
+echo "*** PREPARE COMPILATION PATH TREE"
 
-# Create necessary path tree
-{os.linesep.join(sorted(set(['mkdir -p "'+os.path.dirname(normalize_path(x))+'"' for x in cproject.files if x.endswith('.c')])))}
+# Create & clean object files path tree
+{os.linesep.join(sorted(set(['mkdir -p "'+os.path.dirname(normalize_path(x))+'"'+os.linesep+'rm -vf '+os.path.join(os.path.dirname(escape_path(normalize_path(x))), '*') for x in cproject.files if x.endswith('.c')])))}
 
 # Remove target file
-rm -vf "{args.target_file}"
+rm -vf {escape_path(args.target_file)}
 
-echo "*** END OF PATH TREE"
+echo "*** END OF COMPILATION PATH TREE"
 echo "*** COMPILATION"
 
 # Run C Compiler
-{os.linesep.join( ['echo '+normalize_path(x)+os.linesep+'$CC $CFLAGS -o "'+normalize_path(x)[:-2]+'.o" "../'+normalize_path(x)+'"' for x in cproject.files if x.endswith('.c')] )}
+{os.linesep.join( ['echo '+normalize_path(x)+os.linesep+'$CC $CFLAGS -o "'+normalize_path(x)[:-2]+'.o" "'+os.path.join(args.src_path, normalize_path(x))+'"' for x in cproject.files if x.endswith('.c')] )}
 
 echo "*** END COMPILATION"
 echo "*** LINKING"
