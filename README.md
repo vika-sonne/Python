@@ -9,7 +9,7 @@ pip install argparse, pyserial
 
 
 ## SSPD
-Simple serial port dump.
+**Simple serial port dump.**
 
 Python utility that helps capturing the log especially from serial ports (USART, e.t.c.) and includes features:
 * precise timestamps (μs for Linux, ms for Windows);
@@ -110,13 +110,145 @@ static U8[1370] = {
 ```
 
 ## ASPC
-Atmel Studio Project file Converter. Python 2 command-line utility that helps migrate projects to Eclipse.
-Usually C/C++ project has many include paths & defines, so the main problem is correct copy this items to Eclipse. Mainly, project files represent by one xml file. So it is enough to copy xml data between import & export files. This utility helps done this in semi-automatic way.
+**Atmel Studio project file Converter.**
 
-After running this utility several files will be created:
-- *eclipse cproject.xml* file contains *sourceEntries/entry* xml tags with list of project files. This piece of xml data need to insert into Eclipse *.cproject* file. Or skip this copying and configure excluded files manually in Eclipse project tree.
-- *eclipse settings '(Configuration)' == 'CONFIGURATION_NAME'.xml* files (one per configuration) contains include paths & defines to import on the Eclipse  project property page *"C/C++ General" / "Paths and Symbols"* by button *"Import Settings..."*.
-- Also output can be redirected to *.htm* file to view project properties, configurations e.t.c.
+Command-line utility that helps migrate Atmel Studio projects to Eclipse CDT (GNU MCU Eclipse plug-in) projects.
+
+Usually C/C++ project has many include paths & defines (symbols), so the main problem is correct copy this items to Eclipse. Mainly, project represent by one xml file: *.cproj* for Atmel Studio and *.cproject* for Eclipse CDT. So it is enough to copy xml data between project files. This utility helps done this in semi-automatic way.
+
+### Usage
+
+```sh
+python3 aspc.py -h
+usage: aspc.py [-h] [-v] -p PROJECT_FILE {info,htm,eclipse,sh} ...
+
+Atmel Studio project conversion
+
+positional arguments:
+  {info,htm,eclipse,sh}
+    info                print the Atmel Studio project information
+    htm                 print the html report
+    eclipse             export to Eclipse CDT project
+    sh                  export to build shell script
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v                    verbose level: -v; default: no verbose
+  -p PROJECT_FILE, --project-file PROJECT_FILE
+                        Atmel Studio project file path
+
+Copyright (C) Victoria Danchenko, 2019.
+```
+
+#### Example of *info* command:
+```sh
+python3 aspc.py info -h
+usage: aspc.py info [-h] [-c CONDITION] {conditions,include,exclude,defines}
+
+positional arguments:
+  {conditions,include,exclude,defines}
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c CONDITION, --condition CONDITION
+                        name of Atmel Studio project build condition; optional
+```
+
+This command can be used to get names of build conditions:
+```sh
+python aspc.py -p atmel_studio_project.cproj info conditions
+```
+
+#### Example of *html* command:
+```sh
+python3 aspc.py htm -h
+usage: aspc.py htm [-h]
+
+optional arguments:
+  -h, --help  show this help message and exit
+```
+
+This command useful to get detailed information about Atmel Studio project:
+```sh
+python aspc.py -p atmel_studio_project.cproj html > report.htm
+```
+
+#### Example of *eclipse* command (it can help to export Atmel Studio project to Eclipse CDT project):
+```sh
+python3 aspc.py eclipse -h
+usage: aspc.py eclipse [-h] {include-and-symbols,excluding} ...
+
+positional arguments:
+  {include-and-symbols,excluding}
+                        export to Eclipse CDT project
+    include-and-symbols
+                        print Eclipse settings xml file to import to CDT
+                        project on "C/C++ General/Path and Symbols" tab of
+                        project properties. Contains xml tag
+                        <cdtprojectproperties>
+    excluding           print Eclipse CDT project excluding files. Contains
+                        part of CDT project file: two xml tags
+                        <sourceEntries><entry excluding="..."></sourceEntries>
+
+optional arguments:
+  -h, --help            show this help message and exit
+```
+
+##### Export includes & defines to *settings.xml* file:
+```sh
+python aspc.py -p atmel_studio_project.cproj eclipse include-and-symbols -h
+usage: aspc.py eclipse include-and-symbols [-h] -c CONDITION
+                                           [--include-path-remove-prefix INCLUDE_PATH_REMOVE_PREFIX]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c CONDITION, --condition CONDITION
+                        name of Atmel Studio project build condition
+  --include-path-remove-prefix INCLUDE_PATH_REMOVE_PREFIX
+```
+
+###### Example to get Eclipse CDT *settings.xml* file:
+```sh
+python aspc.py -p atmel_studio_project.cproj eclipse include-and-symbols -c "'\$(Configuration)' == 'CONDITION_NAME'" > settings.xml
+```
+To get *CONDITION_NAME* use *info* command.
+
+Import *settings.xml* file by pressing button *Import Settings...* on "C/C++ General/Path and Symbols" tab of project properties.
+
+##### Export excluded files to *.cproject* file:
+```sh
+python aspc.py -p atmel_studio_project.cproj eclipse excluding > exclude.xml
+```
+Copy contents of *exclude.xml* file to <sourceEntries> xml tag of *.cproject* file.
+
+#### Example of *sh* command (it can help to build Atmel Studio project by Linux command shell):
+```sh
+python3 aspc.py sh -h
+usage: aspc.py sh [-h] [--src-path PATH] -c CONDITION [--cc CC] [--ld LD]
+                  [--cflags CFLAGS] [--ldflags LDFLAGS]
+                  [--toolchain-path PATH] [--target-file TARGET_FILE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  --src-path PATH       path to sources to compile; default: ../
+  -c CONDITION, --condition CONDITION
+                        name of Atmel Studio project build condition
+  --cc CC               toolchain C compiler; default: gcc
+  --ld LD               toolchain linker; default: gcc
+  --cflags CFLAGS       C compiler flags; optional
+  --ldflags LDFLAGS     linker flags; optional
+  --toolchain-path PATH
+                        path to toolchain excecutables; optional; example:
+                        /opt/gcc-arm-none-eabi-9-2019-q4-major/bin
+  --target-file TARGET_FILE
+                        Target file; default: a.out; example: target.elf
+```
+
+Example to get Linux command shell file for ARM Cortex-M4:
+```sh
+python aspc.py -p atmel_studio_project.cproj sh --cc arm-none-eabi-gcc --ld arm-none-eabi-gcc --toolchain-path /opt/gcc-arm-none-eabi-9-2019-q4-major/bin/ -c "'\$(Configuration)' == 'CONDITION_NAME'" --cflags " -DSOME_DEFINE -mcpu=cortex-m4 -mthumb -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -g3 -c" --target-file project.elf > build_broject.sh
+```
+To get *CONDITION_NAME* use *info* command.
 
 ## Generate UUID
 Prints out the UUID as C/C++ array as hex values.
