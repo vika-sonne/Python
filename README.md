@@ -372,3 +372,29 @@ Skip 201 bytes: Started Serial0 and LEDanimation\r\n1\r\nStarted Serial0 and LED
 12:41:31.881 request FLASH_DEFL_END
 12:41:31.883 response FLASH_DEFL_END
 ```
+
+## Python speed tests
+Python time metric tests suit. Used for coding style & interpreter guides.
+
+![](/images/speed_tests.png)
+
+```sh
+python3 ./speed_tests.py -l
+01 array_index_get       for with array[_]
+02 array_index_set       for with array[_] = 0
+03 class_attribute       for with class.attribute = 0
+04 class_slots_attribute for with slots class.attribute = 0
+05 dict_index_get        for with dict[_]
+06 dict_index_set        for with dict[_] = 0
+07 list_index_get        for with list[_]
+08 list_index_set        for with list[_] = 0
+09 memoryview_index_get  for with memoryview[_]
+10 memoryview_index_set  for with memoryview[_] = 0
+11 string_cformat        for with "%..." % (...)
+12 string_concatenate    for with buff += " "
+13 string_format         for with buff.format(...)
+14 string_fstring        for with f"{buff} ..."
+15 string_join           for with buff.join(" ")
+16 synthetic             synthetic
+17 tuple_index_get       for with tuple[_]
+```
