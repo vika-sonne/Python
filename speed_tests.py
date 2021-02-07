@@ -81,6 +81,20 @@ class memoryview_index_set(l_index_set):
 		self.buff = memoryview(array.array('I', [1] * self.cycles))
 
 @test_class
+class bytearray_index_get(l_index_get):
+	'buff = bytearray[_]'
+	def setup(self):
+		super().setup()
+		self.buff = bytearray(self.cycles)
+
+@test_class
+class bytearray_index_set(l_index_set):
+	'bytearray[_] = 0'
+	def setup(self):
+		super().setup()
+		self.buff = bytearray(self.cycles)
+
+@test_class
 class tuple_index_get(l_index_get):
 	'buff = tuple[_]'
 	def setup(self):
@@ -203,7 +217,7 @@ class synthetic(test):
 			self.data, self.data2 = 0, ''
 		def inc(self):
 			self.data += 1
-			self.data2 += ' '
+			self.data2 = self.data2.join(' ')
 	def setup(self):
 		self.cycles = 100_000
 		self.buff = self.a()
