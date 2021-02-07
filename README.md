@@ -1,4 +1,4 @@
-## Python miscellaneous routines for electronic device developers
+## :snake: Python miscellaneous routines for electronic device developers :robot:
 
 This python 3 routines is ready to use for Linux & Windows. Although the Linux is primary OS for me and this routines well tested for it.
 
@@ -373,8 +373,8 @@ Skip 201 bytes: Started Serial0 and LEDanimation\r\n1\r\nStarted Serial0 and LED
 12:41:31.883 response FLASH_DEFL_END
 ```
 
-## Python speed tests
-Python time metric tests suit. Used for coding style & interpreter guides.
+## :muscle: Python speed tests
+**Python time metric tests suit. Used for coding style & interpreter guides.**
 
 One test runs for thousands times to gather it time metric, then averages calculated for this test.
 Here is several kind of tests: get/set data to containers & class attributes, strings manipulation.
@@ -385,23 +385,23 @@ Here is several kind of tests: get/set data to containers & class attributes, st
 List available tests:
 ```sh
 python3 ./speed_tests.py -l
-01 array_index_get       for with array[_]
-02 array_index_set       for with array[_] = 0
-03 class_attribute       for with class.attribute = 0
-04 class_slots_attribute for with slots class.attribute = 0
-05 dict_index_get        for with dict[_]
-06 dict_index_set        for with dict[_] = 0
-07 list_index_get        for with list[_]
-08 list_index_set        for with list[_] = 0
-09 memoryview_index_get  for with memoryview[_]
-10 memoryview_index_set  for with memoryview[_] = 0
-11 string_cformat        for with "%..." % (...)
-12 string_concatenate    for with buff += " "
-13 string_format         for with buff.format(...)
-14 string_fstring        for with f"{buff} ..."
-15 string_join           for with buff.join(" ")
+01 array_index_get       buff = array[_]
+02 array_index_set       array[_] = 0
+03 class_attribute       class.attribute = 0
+04 class_slots_attribute class.attribute = 0 (with __slots__)
+05 dict_index_get        buff = dict[_]
+06 dict_index_set        dict[_] = 0
+07 list_index_get        buff = list[_]
+08 list_index_set        list[_] = 0
+09 memoryview_index_get  buff = memoryview[_]
+10 memoryview_index_set  memoryview[_] = 0
+11 string_cformat        "%..." % (...)
+12 string_concatenate    buff += " "
+13 string_format         buff.format(...)
+14 string_fstring        f"{buff} ..."
+15 string_join           buff.join(" ")
 16 synthetic             synthetic
-17 tuple_index_get       for with tuple[_]
+17 tuple_index_get       buff = tuple[_]
 ```
 Run all tests with csv output:
 ```sh

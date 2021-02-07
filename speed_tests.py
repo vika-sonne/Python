@@ -40,56 +40,56 @@ class l_index_set(test):
 
 @test_class
 class list_index_get(l_index_get):
-	'for with list[_]'
+	'buff = list[_]'
 	def setup(self):
 		super().setup()
 		self.buff = [1] * self.cycles
 
 @test_class
 class list_index_set(l_index_set):
-	'for with list[_] = 0'
+	'list[_] = 0'
 	def setup(self):
 		super().setup()
 		self.buff = [1] * self.cycles
 
 @test_class
 class array_index_get(l_index_get):
-	'for with array[_]'
+	'buff = array[_]'
 	def setup(self):
 		super().setup()
 		self.buff = array.array('I', [1] * self.cycles)
 
 @test_class
 class array_index_set(l_index_set):
-	'for with array[_] = 0'
+	'array[_] = 0'
 	def setup(self):
 		super().setup()
 		self.buff = array.array('I', [1] * self.cycles)
 
 @test_class
 class memoryview_index_get(l_index_get):
-	'for with memoryview[_]'
+	'buff = memoryview[_]'
 	def setup(self):
 		super().setup()
 		self.buff = memoryview(array.array('I', [1] * self.cycles))
 
 @test_class
 class memoryview_index_set(l_index_set):
-	'for with memoryview[_] = 0'
+	'memoryview[_] = 0'
 	def setup(self):
 		super().setup()
 		self.buff = memoryview(array.array('I', [1] * self.cycles))
 
 @test_class
 class tuple_index_get(l_index_get):
-	'for with tuple[_]'
+	'buff = tuple[_]'
 	def setup(self):
 		super().setup()
 		self.buff = tuple(array.array('I', [1] * self.cycles))
 
 @test_class
 class dict_index_get(test):
-	'for with dict[_]'
+	'buff = dict[_]'
 	def setup(self):
 		self.cycles = 1_000_000
 		self.buff = {}
@@ -102,7 +102,7 @@ class dict_index_get(test):
 
 @test_class
 class dict_index_set(test):
-	'for with dict[_] = 0'
+	'dict[_] = 0'
 	def setup(self):
 		self.cycles = 1_000_000
 		self.buff = {}
@@ -122,7 +122,7 @@ class string(test):
 
 @test_class
 class string_concatenate(string):
-	'for with buff += " "'
+	'buff += " "'
 	def run(self):
 		buff = self.buff
 		for _ in range(self.cycles):
@@ -130,7 +130,7 @@ class string_concatenate(string):
 
 @test_class
 class string_join(string):
-	'for with buff.join(" ")'
+	'buff.join(" ")'
 	def run(self):
 		buff = self.buff
 		for _ in range(self.cycles):
@@ -138,7 +138,7 @@ class string_join(string):
 
 @test_class
 class string_format(string):
-	'for with buff.format(...)'
+	'buff.format(...)'
 	def run(self):
 		buff, buff2 = '{0} {1} {2}', ''
 		c1, c2 = 2, 3.0
@@ -147,7 +147,7 @@ class string_format(string):
 
 @test_class
 class string_fstring(string):
-	'for with f"{buff} ..."'
+	'f"{buff} ..."'
 	def run(self):
 		buff = ''
 		c1, c2 = 2, 3.0
@@ -156,7 +156,7 @@ class string_fstring(string):
 
 @test_class
 class string_cformat(string):
-	'for with "%..." % (...)'
+	'"%..." % (...)'
 	def run(self):
 		buff = ''
 		c1, c2 = 2, 3.0
@@ -167,7 +167,7 @@ class string_cformat(string):
 
 @test_class
 class class_attribute(test):
-	'for with class.attribute = 0'
+	'class.attribute = 0'
 	class a:
 		pass
 	def setup(self):
@@ -181,7 +181,7 @@ class class_attribute(test):
 
 @test_class
 class class_slots_attribute(test):
-	'for with slots class.attribute = 0'
+	'class.attribute = 0 (with __slots__)'
 	class a:
 		__slots__ = ('_attribute',)
 	def setup(self):
