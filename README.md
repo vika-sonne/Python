@@ -376,8 +376,13 @@ Skip 201 bytes: Started Serial0 and LEDanimation\r\n1\r\nStarted Serial0 and LED
 ## Python speed tests
 Python time metric tests suit. Used for coding style & interpreter guides.
 
+One test runs for thousands times to gather it time metric, then averages calculated for this test.
+Here is several kind of tests: get/set data to containers & class attributes, strings manipulation.
+
 ![](/images/speed_tests.png)
 
+### Usage
+List available tests:
 ```sh
 python3 ./speed_tests.py -l
 01 array_index_get       for with array[_]
@@ -397,4 +402,28 @@ python3 ./speed_tests.py -l
 15 string_join           for with buff.join(" ")
 16 synthetic             synthetic
 17 tuple_index_get       for with tuple[_]
+```
+Run all tests with csv output:
+```sh
+pypy3 ./speed_tests.py --csv -a
+3.6.12 (db1e853f94de, Nov 18 2020, 09:49:19)
+[PyPy 7.3.3 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)]
+name,avg,min,max,delta
+array_index_get      ,0.00144,0.000847,0.0041,79.3%
+array_index_set      ,0.00151,0.00097,0.00469,79.3%
+class_attribute      ,0.00107,0.000518,0.0042,87.7%
+class_slots_attribute,0.00082,0.000567,0.00214,73.6%
+dict_index_get       ,0.00721,0.00673,0.00826,18.5%
+dict_index_set       ,0.0104,0.0101,0.0113,11.1%
+list_index_get       ,0.00429,0.00365,0.00747,51.1%
+list_index_set       ,0.00373,0.00351,0.00434,19.1%
+memoryview_index_get ,0.0456,0.0429,0.0549,21.9%
+memoryview_index_set ,0.137,0.131,0.144,8.5%
+string_cformat       ,0.327,0.314,0.332,5.49%
+string_concatenate   ,0.499,0.49,0.515,4.81%
+string_format        ,0.0122,0.0105,0.0139,24.4%
+string_fstring       ,0.188,0.18,0.193,6.88%
+string_join          ,0.00193,0.00174,0.00256,32.3%
+synthetic            ,0.705,0.686,0.738,6.98%
+tuple_index_get      ,0.00378,0.0037,0.00422,12.5%
 ```
