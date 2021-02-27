@@ -373,7 +373,7 @@ Skip 201 bytes: Started Serial0 and LEDanimation\r\n1\r\nStarted Serial0 and LED
 12:41:31.883 response FLASH_DEFL_END
 ```
 
-## :keyboard: ZX Spectrum Video Memory Enumation
+## :keyboard: ZX Spectrum Video Memory Emulation
 
 Used to convert images from/to ZX Spectrum video memory dump.
 
@@ -431,4 +431,4 @@ Source image | ZX Spectrum video
 ![](/images/stalker_poster.jpeg)  | ![](/images/stalker_poster.png)
 
 
-And would you like to went the Zone on ZX Spectrum ?..
+And would you like to went the Zone on ZX Spectrum ?.. :robot:
