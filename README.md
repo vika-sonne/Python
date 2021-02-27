@@ -4,7 +4,7 @@ This python 3 routines is ready to use for Linux & Windows. Although the Linux i
 
 Installation required modules by [pip](https://pip.pypa.io/en/stable/installing/):
 ```sh
-pip install argparse, pyserial
+pip install argparse, pyserial, Pillow
 ```
 
 
@@ -373,57 +373,62 @@ Skip 201 bytes: Started Serial0 and LEDanimation\r\n1\r\nStarted Serial0 and LED
 12:41:31.883 response FLASH_DEFL_END
 ```
 
-## :muscle: Python speed tests
-**Python time metric tests suit. Used for coding style & interpreter guides.**
+## :keyboard: ZX Spectrum Video Memory Enumation
 
-One test runs for thousands times to gather it time metric, then averages calculated for this test.
-Here is several kind of tests: get/set data to containers & class attributes, strings manipulation.
-
-![](/images/speed_tests.png)
+Used to convert images from/to ZX Spectrum video memory dump.
 
 ### Usage
-List available tests:
+
+Command-line help:
 ```sh
-python3 ./speed_tests.py -l
-01 array_index_get       buff = array[_]
-02 array_index_set       array[_] = 0
-03 class_attribute       class.attribute = 0
-04 class_slots_attribute class.attribute = 0 (with __slots__)
-05 dict_index_get        buff = dict[_]
-06 dict_index_set        dict[_] = 0
-07 list_index_get        buff = list[_]
-08 list_index_set        list[_] = 0
-09 memoryview_index_get  buff = memoryview[_]
-10 memoryview_index_set  memoryview[_] = 0
-11 string_cformat        "%..." % (...)
-12 string_concatenate    buff += " "
-13 string_format         buff.format(...)
-14 string_fstring        f"{buff} ..."
-15 string_join           buff.join(" ")
-16 synthetic             synthetic
-17 tuple_index_get       buff = tuple[_]
+python3 zxspectrum_video_memory.py -h
+usage: zxspectrum_video_memory.py [-h] {s,w,m,c} ...
+
+ZX Spectrum video utility. It allow import/export image from/to file
+
+positional arguments:
+  {s,w,m,c}   choose subcomand to run
+    s         run speed test to calculate "get image" operations per second
+    w         generate "Hello World" labels with random colors and save to
+              image file
+    m         load test data into video memory
+    c         convert image with ZX video subsystem; image must have size
+              256x192 pixels
+
+optional arguments:
+  -h, --help  show this help message and exit
 ```
-Run all tests with csv output:
+
+Speed tests for cpython & pypy:
 ```sh
-pypy3 ./speed_tests.py --csv -a
+python3 zxspectrum_video_memory.py s
+3.8.5 (default, Jul 28 2020, 12:59:40) 
+[GCC 9.3.0]
+avg=0.027 s/image; 36.7 images/s
+
+pypy3 zxspectrum_video_memory.py s
 3.6.12 (db1e853f94de, Nov 18 2020, 09:49:19)
 [PyPy 7.3.3 with GCC 7.3.1 20180303 (Red Hat 7.3.1-5)]
-name,avg,min,max,delta
-array_index_get      ,0.00144,0.000847,0.0041,79.3%
-array_index_set      ,0.00151,0.00097,0.00469,79.3%
-class_attribute      ,0.00107,0.000518,0.0042,87.7%
-class_slots_attribute,0.00082,0.000567,0.00214,73.6%
-dict_index_get       ,0.00721,0.00673,0.00826,18.5%
-dict_index_set       ,0.0104,0.0101,0.0113,11.1%
-list_index_get       ,0.00429,0.00365,0.00747,51.1%
-list_index_set       ,0.00373,0.00351,0.00434,19.1%
-memoryview_index_get ,0.0456,0.0429,0.0549,21.9%
-memoryview_index_set ,0.137,0.131,0.144,8.5%
-string_cformat       ,0.327,0.314,0.332,5.49%
-string_concatenate   ,0.499,0.49,0.515,4.81%
-string_format        ,0.0122,0.0105,0.0139,24.4%
-string_fstring       ,0.188,0.18,0.193,6.88%
-string_join          ,0.00193,0.00174,0.00256,32.3%
-synthetic            ,0.705,0.686,0.738,6.98%
-tuple_index_get      ,0.00378,0.0037,0.00422,12.5%
+avg=0.002 s/image; 627.0 images/s
 ```
+
+Generates `hello_world.png` then import it into video memory and export to `hello_world_zx.png`:
+```sh
+python zxspectrum_video_memory.py w -l
+```
+
+Converts jpeg image according to ZX Spectrum video subsystem facility:
+```sh
+python3 zxspectrum_video_memory.py c -f stalker-poster.jpeg -s stalker-poster.png
+```
+
+### So, look examples:
+
+Source image | ZX Spectrum video
+------------ | -------------
+![](/images/hello_world.png)      | ![](/images/hello_world_zx.png)
+![](/images/stalker_ico.webp)     | ![](/images/stalker_ico.png)
+![](/images/stalker_poster.jpeg)  | ![](/images/stalker_poster.png)
+
+
+And would you like to went the Zone on ZX Spectrum ?..
