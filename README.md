@@ -375,7 +375,14 @@ Skip 201 bytes: Started Serial0 and LEDanimation\r\n1\r\nStarted Serial0 and LED
 
 ## :keyboard: ZX Spectrum Video Memory Emulation
 
-Used to convert images from/to ZX Spectrum video memory dump.
+Used to convert images from/to ZX Spectrum video memory dump. It allow video memory manipulation with byte access to emulate a screen or ***learn a beauty*** of inexpensive and affordable engineering.
+
+![](/images/zxspectrum_intro.svg)
+
+### ZX Spectrum screen layout & video memory map:
+
+![](/images/zxspectrum_video_memory.svg)
+
 
 ### Usage
 
@@ -419,7 +426,7 @@ python zxspectrum_video_memory.py w -l
 
 Converts jpeg image according to ZX Spectrum video subsystem facility:
 ```sh
-python3 zxspectrum_video_memory.py c -f stalker-poster.jpeg -s stalker-poster.png
+python3 zxspectrum_video_memory.py c -f stalker_poster.jpeg -s stalker_poster.png
 ```
 
 ### So, look examples:
